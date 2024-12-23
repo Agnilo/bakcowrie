@@ -1,0 +1,59 @@
+#version: '4.3'
+
+services:
+  proxy:
+    image: nginx:latest
+    restart: always
+    networks:
+      - cowrie-network
+    ports:
+      - "2222:22"  # Atidarome pradinį prisijungimą per proxy, kuris nukreipia į Cowrie
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf  # Pridedame nginx konfigūraciją
+
+  cowrie:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cowrie-custom:latest
+    restart: always
+    networks:
+      - cowrie-network
+    expose:
+      - "2222"  # Cowrie prieinama tik per proxy
+    volumes:
+      - cowrie-git_honeyfs:/honeyfs
+      - ./share/cowrie/txtcmds:/cowrie/share/cowrie/txtcmds
+      - ./share/cowrie/fs.pickle:/cowrie/share/cowrie/fs.pickle
+      - ./logs:/cowrie/log
+      - ./etc:/cowrie/etc
+      - ./downloads:/cowrie/cowrie-git/var/lib/cowrie/downloads
+    environment:
+      - COWRIE_MYSQL_DATABASE=cowrie
+      - COWRIE_MYSQL_HOST=mysql
+      - COWRIE_MYSQL_USERNAME=cowrie
+      - COWRIE_MYSQL_PASSWORD=yourpassword
+
+  mysql:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cowrie
+      MYSQL_USER: cowrie
+      MYSQL_PASSWORD: yourpassword
+    networks:
+      - cowrie-network
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+volumes:
+  mysql_data:
+  cowrie-git_honeyfs:
+    driver: local
+
+networks:
+  cowrie-network:
+    driver: bridge

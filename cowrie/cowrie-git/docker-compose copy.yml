@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  cowrie:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cowrie-custom
+    restart: always
+    networks:
+      - cowrie-network
+    ports:
+      - "2222:2222"
+    volumes:
+      - C:\Users\ITWORK\Desktop\bakalauras\cowrie\config:/cowrie/cowrie-git/etc
+      - C:\Users\ITWORK\Desktop\bakalauras\cowrie\logs:/cowrie/log
+      - C:\Users\ITWORK\Desktop\bakalauras\cowrie\downloads:/cowrie/cowrie-git/var/lib/cowrie/downloads
+
+      #- cowrie-git_honeyfs:/honeyfs
+      #- C:\Users\ITWORK\Desktop\bakalauras\cowrie\config:/cowrie/cowrie-git/etc
+      #- C:\Users\ITWORK\Desktop\bakalauras\cowrie\logs:/cowrie/log
+      #- C:\Users\ITWORK\Desktop\bakalauras\cowrie\downloads:/cowrie/cowrie-git/var/lib/cowrie/downloads
+      - C:\Users\ITWORK\Desktop\bakalauras\cowrie\config:/cowrie/cowrie-git/etc
+      - C:\Users\ITWORK\Desktop\bakalauras\cowrie\logs:/cowrie/log
+      - C:\Users\ITWORK\Desktop\bakalauras\cowrie\downloads:/cowrie/cowrie-git/var/lib/cowrie/downloads
+  mysql:
+    image: mysql  # Use your specific MySQL image
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root  # set your root password
+      MYSQL_DATABASE: cowrie  # create a database named cowrie
+      MYSQL_USER: cowrie  # optional: create a user
+      MYSQL_PASSWORD: yourpassword  # optional: user's password
+    networks:
+      - cowrie-network
+    volumes:
+      - mysql_data:/var/lib/mysql  # persist data
+      
+volumes:
+  mysql_data:  # Named volume for MySQL data
+
+
+networks:
+  cowrie-network:
+    driver: bridge

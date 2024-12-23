@@ -1,0 +1,36 @@
+build image:
+docker build -t cowrie-custom:latest .
+
+logs in logs dir and conf in conf dir:
+docker run -d --name cowrie --network cowrie-network -p 2222:2222 -v C:\Users\ITWORK\Desktop\bakalauras\cowrie\config:/cowrie/cowrie-git/etc -v C:\Users\ITWORK\Desktop\bakalauras\cowrie\logs:/cowrie/log cowrie-custom
+
+
+DB:
+docker run -d --name mysql-cowrie --network cowrie-network -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=cowrie -e MYSQL_USER=cowrie -e MYSQL_PASSWORD=yourpassword -p 3306:3306 -d mysql:latest
+
+
+docker cp C:\Users\ITWORK\Desktop\bakalauras\cowrie\db\mysql.sql mysql-cowrie:/tmp/mysql.sql
+
+
+docker exec -it mysql-cowrie bash
+mysql -u cowrie -p
+USE cowrie;
+
+SOURCE /tmp/mysql.sql;
+
+
+
+
+username: cowrie
+password: yourpassword
+
+
+SELECT DISTINCT i.input
+FROM auth a
+INNER JOIN input i ON i.session = a.session
+INNER JOIN sessions s ON s.id = a.session
+WHERE a.success = 1 AND i.success = 1 AND a.username = username AND
+a.password = password AND s.ip = IP
+AND i.input NOT LIKE '%ping%' AND i.input NOT LIKE '%exit%' AND i.
+input NOT LIKE '%ls%' AND i.input NOT LIKE '%curl%' AND i.input
+NOT LIKE '%wget%';
